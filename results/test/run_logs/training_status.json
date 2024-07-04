@@ -1,0 +1,51 @@
+{
+    "WKBehavior": {
+        "checkpoints": [
+            {
+                "steps": 5795,
+                "file_path": "results\\test\\WKBehavior\\WKBehavior-5795.onnx",
+                "reward": -1.8676362665539439,
+                "creation_time": 1718592875.2370124,
+                "auxillary_file_paths": [
+                    "results\\test\\WKBehavior\\WKBehavior-5795.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 5795,
+            "file_path": "results\\test\\WKBehavior.onnx",
+            "reward": -1.8676362665539439,
+            "creation_time": 1718592875.2370124,
+            "auxillary_file_paths": [
+                "results\\test\\WKBehavior\\WKBehavior-5795.pt"
+            ]
+        }
+    },
+    "GKBehavior": {
+        "checkpoints": [
+            {
+                "steps": 5784,
+                "file_path": "results\\test\\GKBehavior\\GKBehavior-5784.onnx",
+                "reward": -1.791111028753221,
+                "creation_time": 1718592876.034557,
+                "auxillary_file_paths": [
+                    "results\\test\\GKBehavior\\GKBehavior-5784.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 5784,
+            "file_path": "results\\test\\GKBehavior.onnx",
+            "reward": -1.791111028753221,
+            "creation_time": 1718592876.034557,
+            "auxillary_file_paths": [
+                "results\\test\\GKBehavior\\GKBehavior-5784.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.0.0",
+        "torch_version": "2.3.0+cpu"
+    }
+}

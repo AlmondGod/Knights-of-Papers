@@ -34,6 +34,7 @@ public class SwordWood : MonoBehaviour
     }
 
     private void OnCollisionEnter(Collision collision) {
+        // Debug.Log("Wood Sword collided with: " + collision.gameObject.name);
         // Check if the sword hit the opponent
         if (collision.gameObject.name == "Knight of Grass")
         {
@@ -43,7 +44,7 @@ public class SwordWood : MonoBehaviour
         }
 
         if (collision.gameObject.name == "SwordG" || collision.gameObject.name == "ShieldG") {
-            Debug.Log("Hit the opposing sword/shield!");
+            // Debug.Log("Hit the opposing sword/shield!");
             // Call a method on the agent to add a reward for hitting the opponent
             agent.OnBlockedHit();
         }

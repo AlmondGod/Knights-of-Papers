@@ -9,7 +9,6 @@ import torch.optim as optim
 print("connecting to env...")
 env = UnityEnvironment(file_name="build2/Knights of Papers.exe", seed=1, side_channels=[])
 # Start interacting with the environment.
-print("connected!")
 env.reset()
 knight_one_names = env.behavior_specs.keys()
     
@@ -30,7 +29,6 @@ class CNN(nn.Module):
         self.fc3 = nn.Linear(128, action_space)
 
     def _get_conv_output_size(self, shape):
-        print(shape)
         x = torch.rand(1, *shape)
         x = self.conv1(x)
         x = self.conv2(x)
@@ -54,7 +52,6 @@ class CNN(nn.Module):
         return x
 
 wooden_knight = list(env.behavior_specs.keys())[0]
-print(f"specs: {list(env.behavior_specs.keys())}")
 grass_knight = list(env.behavior_specs.keys())[1]
 
 behavior_spec = env.behavior_specs[wooden_knight]
@@ -68,8 +65,9 @@ action_space = behavior_spec.action_spec.continuous_size
 model = CNN(actuator_obs_space, action_space, visual_obs_space)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
+num_episodes = 100
 # Main loop to interact with the environment
-for episode in range(10):
+for episode in range(num_episodes):
     print(f"Starting episode:{episode}")
     env.reset()
     decision_steps_wooden, terminal_steps_wooden = env.get_steps(wooden_knight)
@@ -123,3 +121,11 @@ for episode in range(10):
             break
 
 env.close()
+
+torch.save({
+    'episodes': num_episodes,
+    'model_state_dict': model.state_dict(),
+    'optimizer_state_dict': optimizer.state_dict(),
+    'loss': loss,
+    # any other metrics or variables you need
+}, 'saved_models/base_cnn.pth')

@@ -10,7 +10,6 @@ import random
 print("connecting to env...")
 env = UnityEnvironment(file_name="build2/Knights of Papers.exe", seed=1, side_channels=[])
 # Start interacting with the environment.
-print("connected!")
 env.reset()
 knight_one_names = env.behavior_specs.keys()
     
@@ -145,6 +144,7 @@ class DDPG:
         actions_pred = self.actor(visual_inputs, vector_inputs)
         actor_loss = -self.critic(visual_inputs, vector_inputs, actions_pred).mean()
         
+        print(f"actor loss: {actor_loss}, critic loss: {critic_loss}")
         self.actor_optimizer.zero_grad()
         actor_loss.backward()
         self.actor_optimizer.step()
@@ -175,7 +175,6 @@ class RingBuffer:
     
 # Get the state and action sizes
 wooden_knight = list(env.behavior_specs.keys())[0]
-print(f"specs: {list(env.behavior_specs.keys())}")
 grass_knight = list(env.behavior_specs.keys())[1]
 
 behavior_spec = env.behavior_specs[wooden_knight]
@@ -189,7 +188,8 @@ action_bound = 1.0 #normalizes action bounds to [-1, 1]
 # Create an instance of the custom network
 agent = DDPG(actuator_obs_space, visual_obs_space, action_space, action_bound)
 
-for episode in range(10):
+num_episodes = 100
+for episode in range(num_episodes):
     print(f"Starting episode:{episode}")
     
     env.reset()
@@ -242,3 +242,8 @@ for episode in range(10):
 
 env.close()
 
+torch.save({
+    'episodes': num_episodes,
+    'model_state_dict': agent.state_dict()
+    # any other metrics or variables you need
+}, 'saved_models/ddpg.pth')

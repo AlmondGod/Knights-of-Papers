@@ -1,8 +1,5 @@
-venv
-UserSettings
-results
 Logs
 Config
 builds
 Library
-
+venv

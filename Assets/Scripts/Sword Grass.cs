@@ -34,6 +34,7 @@ public class SwordGrass : MonoBehaviour
     }
 
     private void OnCollisionEnter(Collision collision) {
+        // Debug.Log("Grass Sword collided with: " + collision.gameObject.name);
         // Check if the sword hit the opponent
         if (collision.gameObject.name == "Knight of Wood")
         {
@@ -51,7 +52,7 @@ public class SwordGrass : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Sword triggered with: " + other.gameObject.name);
+        // Debug.Log("Sword triggered with: " + other.gameObject.name);
         if (other.gameObject.CompareTag("whead"))
         {
             Debug.Log("Sword triggered with: " + other.gameObject.name);

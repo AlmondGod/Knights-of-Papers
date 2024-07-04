@@ -12,10 +12,8 @@ public class KnightofGrass : Agent {
     private Rigidbody rb;
     JointDriveController m_JdController;
     OrientationCubeController m_OrientationCube;
-
-    public Transform Opponent; // Add this field
+    public Transform Opponent; 
     private float previousDistanceToOpponent;
-
     public Transform Body;
     public Transform UpperArm_L;
     public Transform LowerArm_L;
@@ -29,7 +27,6 @@ public class KnightofGrass : Agent {
 
     public override void Initialize()
     {
-        // Debug.Log("Initialize called");
         // Instantiate the OrientationCubeController directly
         GameObject orientationCubeObject = new GameObject("OrientationCube");
         m_OrientationCube = orientationCubeObject.AddComponent<OrientationCubeController>();
@@ -39,8 +36,8 @@ public class KnightofGrass : Agent {
         
         GameObject jointdriveobject = new GameObject("JointDrive");
         m_JdController = jointdriveobject.AddComponent<JointDriveController>();
-        m_JdController.maxJointForceLimit = 50f;
-        m_JdController.maxJointSpring = 10f;
+        m_JdController.maxJointForceLimit = 10000f;
+        m_JdController.maxJointSpring = 100000f;
         m_JdController.jointDampen = 5f;
 
         m_JdController.transform.parent = transform;
@@ -94,8 +91,6 @@ public class KnightofGrass : Agent {
     }
 
     private void CollectObservationBodyPart(BodyPart bp, VectorSensor sensor) {
-        // Debug.Log("collected body part obs");
-        
         sensor.AddObservation(m_OrientationCube.transform.InverseTransformDirection(bp.rb.velocity));
         sensor.AddObservation(m_OrientationCube.transform.InverseTransformDirection(bp.rb.angularVelocity));
         sensor.AddObservation(m_OrientationCube.transform.InverseTransformDirection(bp.rb.position - Body.position));
@@ -105,7 +100,6 @@ public class KnightofGrass : Agent {
     }
 
     public override void CollectObservations(VectorSensor sensor) {
-        // Debug.Log("collected obs");
         var cubeForward = m_OrientationCube.transform.forward;
 
         //ragdoll's avg vel
@@ -123,38 +117,72 @@ public class KnightofGrass : Agent {
         {
             CollectObservationBodyPart(bodyPart, sensor);
         } 
-
-        // Debug.Log($"Total Observations: {sensor.ObservationSize()}");
     }
 
     //the knight can both move and rotate its upper and lower right and left arms
     //as well as its right and left foot and knee
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        // Debug.Log("OnActionReceived called");
         var bpDict = m_JdController.bodyPartsDict;
-        var i = 0;
-
         var continuousActions = actionBuffers.ContinuousActions;
-        // Debug.Log($"ContinuousActions Length: {continuousActions.Length}");
-        foreach (var bp in bpDict.Values)
+        Debug.Log("continuous actions length: " + continuousActions.Length);
+
+        foreach (var transform in bpDict.Keys)
         {
-            if (continuousActions.Length >= (i * 3 + i) && bp != null && bp.joint != null)
-            {
-                bp.SetJointTargetRotation(continuousActions[i * 3], continuousActions[i * 3 + 1], continuousActions[i * 3 + 2]);
-                bp.SetJointStrength(continuousActions[bpDict.Count * 3 + i]);
+            //if bp is head dont rotate on the z axis
+            //if bp is lower arm or lower leg dont rotate on z or y axis
+            //if bp is upper leg dont rotate on y axis
+            var bp = bpDict[transform];
+
+            if (transform.Equals(UpperArm_L)) {
+                Debug.Log("UpperArm_L");
+                bp.SetJointTargetRotation(continuousActions[0], continuousActions[1], continuousActions[2]);
+                bp.SetJointStrength(continuousActions[3]);
+            } else if (transform.Equals(LowerArm_L)) {
+                Debug.Log("LowerArm_L");
+                bp.SetJointTargetRotation(continuousActions[4], 0, 0);
+                bp.SetJointStrength(continuousActions[5]);
+            } else if (transform.Equals(UpperArm_R)) {
+                Debug.Log("UpperArm_R");
+                bp.SetJointTargetRotation(continuousActions[6], continuousActions[7], continuousActions[8]);
+                bp.SetJointStrength(continuousActions[9]);
+            } else if (transform.Equals(LowerArm_R)) {
+                Debug.Log("LowerArm_R");
+                bp.SetJointTargetRotation(continuousActions[10], 0, 0);
+                bp.SetJointStrength(continuousActions[11]);
+            } else if (transform.Equals(UpperLeg_L)) {
+                Debug.Log("UpperLeg_L");
+                bp.SetJointTargetRotation(continuousActions[12], 0, continuousActions[13]);
+                bp.SetJointStrength(continuousActions[14]);
+            } else if (transform.Equals(LowerLeg_L)) {
+                Debug.Log("LowerLeg_L");
+                bp.SetJointTargetRotation(continuousActions[15], 0, 0);
+                bp.SetJointStrength(continuousActions[16]);
+            } else if (transform.Equals(UpperLeg_R)) {
+                Debug.Log("UpperLeg_R");
+                bp.SetJointTargetRotation(continuousActions[17], 0, continuousActions[18]);
+                bp.SetJointStrength(continuousActions[19]);
+            } else if (transform.Equals(LowerLeg_R)) {
+                Debug.Log("LowerLeg_R");
+                bp.SetJointTargetRotation(continuousActions[20], 0, 0);
+                bp.SetJointStrength(continuousActions[21]);
+            } else if (transform.Equals(Head)) {
+                Debug.Log("Head");
+                bp.SetJointTargetRotation(continuousActions[22], continuousActions[23], 0);
+                bp.SetJointStrength(continuousActions[24]);
             }
         }
         if (Opponent != null)
         {
             float currentDistanceToOpponent = Vector3.Distance(Body.transform.position, Opponent.position);
-            Debug.Log("Distance to opponent: " + currentDistanceToOpponent);
             if (currentDistanceToOpponent < previousDistanceToOpponent)
             {
+                Debug.Log("positive closer reward");
                 AddReward(0.01f); // Reward for getting closer
             }
-            else if (currentDistanceToOpponent > previousDistanceToOpponent)
-            {
+            else if (currentDistanceToOpponent >= previousDistanceToOpponent)
+            {   
+                Debug.Log("further reward");
                 AddReward(-0.01f); // Reward for getting closer
             }
             previousDistanceToOpponent = currentDistanceToOpponent;
@@ -162,10 +190,7 @@ public class KnightofGrass : Agent {
     }
 
     private void OnCollisionEnter(Collision collision) {
-        Debug.Log("OnCollisionEnter called");
-        Debug.Log(collision.gameObject.name);
         if (collision.gameObject.name == "WallRight" || collision.gameObject.name == "WallLeft" || collision.gameObject.name == "WallWood" || collision.gameObject.name == "WallGrass") {
-            Debug.Log("OnCollisionEnter executed with " + collision.gameObject.name);
             SetReward(-2f); // Out of the arena
             EndEpisode();
         }
@@ -173,14 +198,11 @@ public class KnightofGrass : Agent {
 
     private void OnTriggerEnter(Collider other)
     {  
-        Debug.Log("OnTriggerEnter called with " + other.gameObject.name);
         if (other.gameObject.name == "WallRight" || other.gameObject.name == "WallLeft" || other.gameObject.name == "WallWood" || other.gameObject.name == "WallGrass") {
-            Debug.Log("OnTriggerEnter executed with " + other.gameObject.name);
             SetReward(-2f); // Out of the arena
             EndEpisode();
         }
         if (other.TryGetComponent(out Wall wall)) {
-            Debug.Log("OnTriggerEnter executed with " + other.gameObject.name);
             SetReward(-2f); // Out of the arena
             EndEpisode();
         }
@@ -191,19 +213,18 @@ public class KnightofGrass : Agent {
     }
 
     public void OnBlockedHit() {
-        AddReward(0.1f); // Hit the opposing shield or sword
+        AddReward(10f); // Hit the opposing shield or sword
     }
 
     public void OnSwordHitOpponent()
     {
         // Add a positive reward for hitting the opponent
-        AddReward(1.0f);
+        AddReward(100f);
         EndEpisode();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        Debug.Log("Heuristic called");
         var continuousActions = actionsOut.ContinuousActions;
 
         // Set all actions to 0 initially
@@ -243,21 +264,6 @@ public class KnightofGrass : Agent {
         continuousActions[22] = Input.GetKey(KeyCode.H) ? 1.0f : 0.0f; 
         continuousActions[23] = Input.GetKey(KeyCode.H) ? 1.0f : 0.0f; 
         continuousActions[24] = Input.GetKey(KeyCode.I) ? 1.0f : 0.0f; 
-        continuousActions[25] = Input.GetKey(KeyCode.I) ? 1.0f : 0.0f; 
-        continuousActions[26] = Input.GetKey(KeyCode.I) ? 1.0f : 0.0f; 
-
-        //stregth
-        continuousActions[27] = Input.GetKey(KeyCode.J) ? 1.0f : 0.0f; 
-        continuousActions[28] = Input.GetKey(KeyCode.K) ? 1.0f : 0.0f; 
-        continuousActions[29] = Input.GetKey(KeyCode.L) ? 1.0f : 0.0f; 
-        continuousActions[30] = Input.GetKey(KeyCode.M) ? 1.0f : 0.0f;
-        continuousActions[31] = Input.GetKey(KeyCode.N) ? 1.0f : 0.0f;
-        continuousActions[32] = Input.GetKey(KeyCode.O) ? 1.0f : 0.0f;
-        continuousActions[33] = Input.GetKey(KeyCode.P) ? 1.0f : 0.0f;
-        continuousActions[34] = Input.GetKey(KeyCode.Q) ? 1.0f : 0.0f;
-        continuousActions[35] = Input.GetKey(KeyCode.R) ? 1.0f : 0.0f;
-
-        Debug.Log($"Heuristic actions: {string.Join(", ", continuousActions)}");
     }
 
     Vector3 GetAvgVelocity()
