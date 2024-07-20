@@ -175,9 +175,6 @@ class RingBuffer:
     def __len__(self):
         return len(self.buffer)
     
-x = DDPG(2, 3,2, 1.0)
-print(x.state_dict)
-    
 # Get the state and action sizes
 wooden_knight = list(env.behavior_specs.keys())[0]
 grass_knight = list(env.behavior_specs.keys())[1]

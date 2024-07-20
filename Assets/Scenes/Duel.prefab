@@ -141,7 +141,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -287,7 +287,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -433,7 +433,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -579,7 +579,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -761,6 +761,10 @@ PrefabInstance:
     - target: {fileID: 4528308668680715155, guid: 2ed4f56205f41a848963443ec69daad7, type: 3}
       propertyPath: m_Height
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528308668680715155, guid: 2ed4f56205f41a848963443ec69daad7, type: 3}
+      propertyPath: m_Grayscale
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4576853802954629963, guid: 2ed4f56205f41a848963443ec69daad7, type: 3}
       propertyPath: m_XMotion
@@ -1528,6 +1532,10 @@ PrefabInstance:
     - target: {fileID: 3378377226999153526, guid: 24e413ff27cb90e4da88fa2b4f28489f, type: 3}
       propertyPath: m_Height
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3378377226999153526, guid: 24e413ff27cb90e4da88fa2b4f28489f, type: 3}
+      propertyPath: m_Grayscale
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3641376874876766823, guid: 24e413ff27cb90e4da88fa2b4f28489f, type: 3}
       propertyPath: m_XMotion
