@@ -6,8 +6,6 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
 # This is a non-blocking call that only loads the environment.
 env = UnityEnvironment(file_name="build6.app", seed=1, side_channels=[])
 print("env connected")
@@ -34,7 +32,7 @@ class Actor(nn.Module):
         self.max_action = max_action
 
     def _get_conv_output_size(self, shape):
-        x = torch.rand(1, 3, *shape).to(device)
+        x = torch.rand(1, 3, *shape)
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         return int(np.prod(x.size()))
@@ -81,7 +79,7 @@ class DualCritic(nn.Module):
         self.fc6 = nn.Linear(256, 1)
 
     def _get_conv_output_size(self, shape):
-        x = torch.rand(1, 3, *shape).to(device)
+        x = torch.rand(1, 3, *shape)
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         return int(np.prod(x.size()))
@@ -136,13 +134,13 @@ class ReplayBuffer:
             dones.append(np.array(d))
 
         return (
-            torch.FloatTensor(np.array(states)).to(device),
-            torch.FloatTensor(np.array(vision)).to(device),
-            torch.FloatTensor(np.array(actions)).to(device),
-            torch.FloatTensor(np.array(next_states)).to(device),
-            torch.FloatTensor(np.array(next_vision)).to(device),
-            torch.FloatTensor(np.array(rewards).reshape(-1, 1)).to(device),
-            torch.FloatTensor(np.array(dones).reshape(-1, 1)).to(device)
+            torch.FloatTensor(np.array(states)),
+            torch.FloatTensor(np.array(vision)),
+            torch.FloatTensor(np.array(actions)),
+            torch.FloatTensor(np.array(next_states)),
+            torch.FloatTensor(np.array(next_vision)),
+            torch.FloatTensor(np.array(rewards).reshape(-1, 1)),
+            torch.FloatTensor(np.array(dones).reshape(-1, 1))
         )
 
 class SAC:
@@ -156,19 +154,19 @@ class SAC:
         self.actor_lr = 0.0001
         self.critic_lr = 0.001
         
-        self.actor = Actor(state_size, action_size, max_action, visual_input_shape).to_device()
-        self.dualcritics = DualCritic(state_size, action_size, visual_input_shape).to_device()
+        self.actor = Actor(state_size, action_size, max_action, visual_input_shape)
+        self.dualcritics = DualCritic(state_size, action_size, visual_input_shape)
         self.actor_loss = 0
 
-        self.target_critics = DualCritic(state_size, action_size, visual_input_shape).to_device()
+        self.target_critics = DualCritic(state_size, action_size, visual_input_shape)
         self.target_critics.load_state_dict(self.dualcritics.state_dict()) #sets target and regular to have same params at the start
         
         self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=self.actor_lr)
         self.critic_optimizer = optim.Adam(list(self.dualcritics.parameters()), lr=self.critic_lr)
     
     def select_action(self, visual_input, vector_input):
-        visual_input = torch.FloatTensor(visual_input).unsqueeze(0).to_device()
-        vector_input = torch.FloatTensor(vector_input).unsqueeze(0).to_device()
+        visual_input = torch.FloatTensor(visual_input).unsqueeze(0)
+        vector_input = torch.FloatTensor(vector_input).unsqueeze(0)
         action, _ = self.actor.sample(vector_input, visual_input)
         return action.detach()
 
@@ -242,8 +240,8 @@ for episode in range(num_episodes):
     while len(decision_steps_wooden) > 0 and len(decision_steps_grass) > 0:
         #generate actions if we have decision steps to go
         for agent_id in decision_steps_wooden.agent_id:
-            obs = torch.tensor(decision_steps_wooden.obs[0][agent_id], dtype=torch.float32).to_device()
-            visual_obs = torch.tensor(decision_steps_wooden.obs[1][agent_id], dtype=torch.float32).permute(2, 0, 1).to_device()  # Change to (C, H, W)
+            obs = torch.tensor(decision_steps_wooden.obs[0][agent_id], dtype=torch.float32)
+            visual_obs = torch.tensor(decision_steps_wooden.obs[1][agent_id], dtype=torch.float32).permute(2, 0, 1)  # Change to (C, H, W)
 
             with torch.no_grad():
                 action = np.expand_dims(model.select_action(visual_obs, obs).cpu().numpy()[0] * max_action, axis=0)
@@ -253,13 +251,13 @@ for episode in range(num_episodes):
 
             reward = decision_steps_wooden.reward[agent_id]
             done = len(terminal_steps_wooden) > 0 or len(terminal_steps_grass) > 0
-            next_obs = torch.tensor(decision_steps_wooden.obs[0][agent_id], dtype=torch.float32).to_device()
-            next_visual_obs = torch.tensor(decision_steps_wooden.obs[1][agent_id], dtype= torch.float32).permute(2, 0, 1).to_device()
+            next_obs = torch.tensor(decision_steps_wooden.obs[0][agent_id], dtype=torch.float32)
+            next_visual_obs = torch.tensor(decision_steps_wooden.obs[1][agent_id], dtype= torch.float32).permute(2, 0, 1)
             experience_replay.add((obs, visual_obs, action[0], next_obs, next_visual_obs, reward, done))
 
         for agent_id in decision_steps_grass.agent_id:  
-            obs = torch.tensor(decision_steps_grass.obs[1][agent_id - 6], dtype=torch.float32).to_device()
-            visual_obs = torch.tensor(decision_steps_grass.obs[0][agent_id - 6], dtype= torch.float32).permute(2, 0, 1).to_device()
+            obs = torch.tensor(decision_steps_grass.obs[1][agent_id - 6], dtype=torch.float32)
+            visual_obs = torch.tensor(decision_steps_grass.obs[0][agent_id - 6], dtype= torch.float32).permute(2, 0, 1)
 
             with torch.no_grad():
                 action = np.expand_dims(model.select_action(visual_obs, obs).cpu().numpy()[0] * max_action, axis=0)
@@ -268,8 +266,8 @@ for episode in range(num_episodes):
             env.set_action_for_agent(grass_knight, agent_id, action_tuple)
             
             reward = decision_steps_grass.reward[agent_id - 6]
-            next_obs = torch.tensor(decision_steps_wooden.obs[0][agent_id - 6], dtype=torch.float32).to_device()
-            next_visual_obs = torch.tensor(decision_steps_wooden.obs[1][agent_id - 6], dtype= torch.float32).permute(2, 0, 1).to_device()
+            next_obs = torch.tensor(decision_steps_wooden.obs[0][agent_id - 6], dtype=torch.float32)
+            next_visual_obs = torch.tensor(decision_steps_wooden.obs[1][agent_id - 6], dtype= torch.float32).permute(2, 0, 1)
             done = len(terminal_steps_wooden) > 0 or len(terminal_steps_grass) > 0
             experience_replay.add((obs, visual_obs, action[0], next_obs, next_visual_obs, reward, done))
 

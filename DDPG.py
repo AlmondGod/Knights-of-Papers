@@ -5,10 +5,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import random
+import torch.nn.functional as F
 
 # This is a non-blocking call that only loads the environment.
 print("connecting to env...")
-env = UnityEnvironment(file_name="build4.app", seed=1, side_channels=[])
+env = UnityEnvironment(file_name="build6.app", seed=1, side_channels=[])
 # Start interacting with the environment.
 print("connected to env")
 env.reset()
@@ -18,28 +19,26 @@ print(knight_one_names)
 class Actor(nn.Module):
     def __init__(self, state_size, action_size, action_bound, visual_input_shape):
         super(Actor, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=2)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=2)
+        self.conv1 = nn.Conv2d(visual_input_shape[2], 16, kernel_size=3, stride=1, padding=1)
+        # self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
         self.conv_output_size = self._get_conv_output_size(visual_input_shape)
 
-        self.fc1 = nn.Linear(self.conv_output_size + state_size, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, action_size)
+        self.fc1 = nn.Linear(self.conv_output_size + state_size, 256)
+        self.fc2 = nn.Linear(256, 256)
+        self.fc3 = nn.Linear(256, action_size)
         self.action_bound = action_bound
 
     def _get_conv_output_size(self, shape):
-        x = torch.rand(1, *shape)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
+        x = torch.rand(1, shape[2], shape[0], shape[1])  # [batch_size, channels, height, width]
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
         return int(np.prod(x.size()))
 
     def forward(self, visual_input, vector_input):
         x1 = torch.relu(self.conv1(visual_input))
         x1 = torch.relu(self.conv2(x1))
-        x1 = torch.relu(self.conv3(x1))
-        x1 = x1.view(x1.size(0), -1)
+        x1 = x1.reshape(x1.size(0), -1)
 
         x = torch.cat((x1, vector_input), dim=1)
         x = torch.relu(self.fc1(x))
@@ -50,26 +49,24 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     def __init__(self, state_size, action_size, visual_input_shape):
         super(Critic, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=2)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=2)
+        self.conv1 = nn.Conv2d(visual_input_shape[2], 16, kernel_size=3, stride=1, padding=1)
+        # self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
         self.conv_output_size = self._get_conv_output_size(visual_input_shape)
 
-        self.fc1 = nn.Linear(self.conv_output_size + state_size + action_size, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, 1)
+        self.fc1 = nn.Linear(self.conv_output_size + state_size + action_size, 256)
+        self.fc2 = nn.Linear(256, 256)
+        self.fc3 = nn.Linear(256, 1)
 
     def _get_conv_output_size(self, shape):
-        x = torch.rand(1, *shape)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
+        x = torch.rand(1, shape[2], shape[0], shape[1])  # [batch_size, channels, height, width]
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
         return int(np.prod(x.size()))
 
     def forward(self, visual_input, vector_input, action):
         x1 = torch.relu(self.conv1(visual_input))
         x1 = torch.relu(self.conv2(x1))
-        x1 = torch.relu(self.conv3(x1))
         x1 = x1.view(x1.size(0), -1)
 
         x = torch.cat((x1, vector_input, action), dim=1)
@@ -108,28 +105,55 @@ class DDPG:
             target_param.data.copy_(tau * source_param.data + (1.0 - tau) * target_param.data)
     
     def memorize(self, state, action, reward, next_state, done):
+        action = np.array(action).flatten()
         self.memory.add((state, action, reward, next_state, done))
     
+    # def act(self, visual_input, vector_input):
+    #     visual_input = torch.FloatTensor(visual_input).unsqueeze(0)
+    #     vector_input = torch.FloatTensor(vector_input).unsqueeze(0)
+    #     self.actor.eval()
+    #     with torch.no_grad():
+    #         action = self.actor(visual_input, vector_input).cpu().data.numpy().flatten()
+    #     self.actor.train()
+    #     return action + np.random.normal(0, 0.1, size=self.action_size)  # Adding noise for exploration
+    
     def act(self, visual_input, vector_input):
-        visual_input = torch.FloatTensor(visual_input).unsqueeze(0)
+        # Ensure visual_input is in the correct shape [batch_size, channels, height, width]
+        print(f"vis input shape: {visual_input.shape}")
+        visual_input = torch.FloatTensor(visual_input)
+        if visual_input.dim() == 3:
+            visual_input = visual_input.unsqueeze(0)  # Add batch dimension if needed
+        visual_input = visual_input.permute(0, 3, 1, 2)  # Rearrange dimensions
+        
         vector_input = torch.FloatTensor(vector_input).unsqueeze(0)
+        
         self.actor.eval()
         with torch.no_grad():
             action = self.actor(visual_input, vector_input).cpu().data.numpy().flatten()
         self.actor.train()
-        return action + np.random.normal(0, 0.1, size=self.action_size)  # Adding noise for exploration
+        return action + np.random.normal(0, 0.1, size=self.action_size)
     
     def replay(self):
+        print("replaying experience")
         if len(self.memory) < self.batch_size:
             return
         
         minibatch = self.memory.sample(self.batch_size)
-        
+
+        print(f"minibatch shape: ({len(minibatch)}, {len(minibatch[0])})")
+        print(f"state shape: ({len(minibatch[0][0][0])}, {len(minibatch[0][0][1])})")
+        print(f"action shape: {len(minibatch[0][1])}")
+        print(f"reward: {minibatch[0][2]}")  # This is a scalar, so we just print its value
+        print(f"next state shape: ({len(minibatch[0][3][0])}, {len(minibatch[0][3][1])})")
+        print(f"done: {minibatch[0][4]}")  # This is a boolean, so we just print its value
+    
         visual_inputs = torch.FloatTensor(np.array([m[0][0] for m in minibatch]))
+        visual_inputs = visual_inputs.permute(0, 3, 1, 2)  # Rearrange dimensions
         vector_inputs = torch.FloatTensor(np.array([m[0][1] for m in minibatch]))
         actions = torch.FloatTensor(np.array([m[1] for m in minibatch]))
         rewards = torch.FloatTensor(np.array([m[2] for m in minibatch])).unsqueeze(1)
         next_visual_inputs = torch.FloatTensor(np.array([m[3][0] for m in minibatch]))
+        next_visual_inputs = next_visual_inputs.permute(0, 3, 1, 2)
         next_vector_inputs = torch.FloatTensor(np.array([m[3][1] for m in minibatch]))
         dones = torch.FloatTensor(np.array([m[4] for m in minibatch])).unsqueeze(1)
         
@@ -185,13 +209,13 @@ behavior_spec = env.behavior_specs[wooden_knight]
 
 # Extract observation and action space sizes
 actuator_obs_space = behavior_spec.observation_specs[0][0][0]
-visual_obs_space = behavior_spec.observation_specs[1][0]
+visual_obs_space = behavior_spec.observation_specs[1].shape
 print(f"VISOBS: {visual_obs_space}")
 action_space = behavior_spec.action_spec.continuous_size
 action_bound = 100000 #normalizes action bounds to [-100000, 100000]
 
 # Create an instance of the custom network
-agent = DDPG(actuator_obs_space, visual_obs_space, action_space, action_bound)
+agent = DDPG(actuator_obs_space, tuple(visual_obs_space), action_space, action_bound)
 
 num_episodes = 100
 for episode in range(num_episodes):
@@ -200,27 +224,60 @@ for episode in range(num_episodes):
     env.reset()
     decision_steps_wooden, terminal_steps_wooden = env.get_steps(wooden_knight)
     decision_steps_grass, terminal_steps_grass = env.get_steps(grass_knight)
-
+    first = True
+    
     while len(decision_steps_wooden) > 0 and len(decision_steps_grass) > 0:
          # Generate actions if we have decision steps to go
         for agent_id in decision_steps_wooden.agent_id:
             obs = decision_steps_wooden.obs[0][agent_id]
-            visual_obs = decision_steps_wooden.obs[1][agent_id]
+            visual_obs = torch.tensor(decision_steps_wooden.obs[1][agent_id], dtype=torch.float32) 
+            # visual_obs = decision_steps_wooden.obs[1][agent_id]
 
             action = agent.act(visual_obs, obs)
             action_tuple = ActionTuple(continuous=np.expand_dims(action, axis=0))
             env.set_action_for_agent(wooden_knight, agent_id, action_tuple)
 
+            if first:
+                prev_obs = np.zeros((len(decision_steps_wooden) * 2, actuator_obs_space))
+                prev_visual_obs = np.zeros((len(decision_steps_wooden) * 2, visual_obs_space[0], visual_obs_space[1], visual_obs_space[2]))
+                prev_action = np.zeros((len(decision_steps_wooden) * 2, action_space))
+                first = False
+
+            print(f"shapes: o: {prev_obs.shape}, vo: {prev_visual_obs.shape}, a: {prev_action.shape}")
+            
+            agent.memorize((prev_visual_obs[agent_id], prev_obs[agent_id]), prev_action[agent_id], 0, (visual_obs, obs), False)
+            print("action obs visobs shapes:")
+            print(action.shape)
+            print(obs.shape)
+            print(visual_obs.shape)
+            prev_action[agent_id] = action
+            prev_obs[agent_id] = obs
+            prev_visual_obs[agent_id] = visual_obs
+
         for agent_id in decision_steps_grass.agent_id:
             obs = decision_steps_grass.obs[1][agent_id - 6]
-            visual_obs = decision_steps_grass.obs[0][agent_id - 6]
+            visual_obs = torch.tensor(decision_steps_grass.obs[0][agent_id - 6], dtype=torch.float32) 
+            # visual_obs = decision_steps_grass.obs[0][agent_id - 6]
 
             action = agent.act(visual_obs, obs)
             action_tuple = ActionTuple(continuous=np.expand_dims(action, axis=0))
             env.set_action_for_agent(grass_knight, agent_id, action_tuple)
 
+            if first:
+                prev_obs = np.zeros((len(decision_steps_wooden) * 2, actuator_obs_space))
+                prev_visual_obs = np.zeros((len(decision_steps_wooden) * 2, visual_obs_space[0], visual_obs_space[1], visual_obs_space[2]))
+                prev_action = np.zeros((len(decision_steps_wooden) * 2, action_space))
+                first = False
+
+            agent.memorize((prev_visual_obs[agent_id - 6], prev_obs[agent_id - 6]), prev_action[agent_id - 6], 0, (visual_obs, obs), False)
+            prev_action[agent_id] = action
+            print(f"shapes: o: {prev_obs.shape}, vo: {prev_visual_obs.shape}, a: {prev_action.shape}")
+            prev_obs[agent_id] = obs
+            prev_visual_obs[agent_id] = visual_obs
+
         # Step the environment
-        env.step()
+        for _ in range(50):
+            env.step()
 
         decision_steps_wooden, terminal_steps_wooden = env.get_steps(wooden_knight)
         decision_steps_grass, terminal_steps_grass = env.get_steps(grass_knight)

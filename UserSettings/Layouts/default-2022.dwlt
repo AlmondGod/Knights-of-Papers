@@ -15,7 +15,7 @@ MonoBehaviour:
   m_PixelRect:
     serializedVersion: 2
     x: 269
-    y: 192
+    y: 211
     width: 1366
     height: 685
   m_ShowMode: 4
@@ -189,8 +189,8 @@ MonoBehaviour:
     y: 0
     width: 250
     height: 462
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 201, y: 221}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 13}
   m_Panes:
   - {fileID: 13}
@@ -215,8 +215,8 @@ MonoBehaviour:
     y: 0
     width: 839
     height: 462
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 202, y: 221}
+  m_MaxSize: {x: 4002, y: 4021}
   m_ActualView: {fileID: 12}
   m_Panes:
   - {fileID: 12}
@@ -297,7 +297,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 519
-    y: 222
+    y: 241
     width: 837
     height: 441
   m_SerializedDataModeController:
@@ -656,7 +656,7 @@ MonoBehaviour:
   m_Rotation:
     m_Target: {x: 0.28603518, y: -0.66819346, z: 0.31243956, w: 0.6116848}
     speed: 2
-    m_Value: {x: 0.2860244, y: -0.6681683, z: 0.3124278, w: 0.61166173}
+    m_Value: {x: -0.28603518, y: 0.66819346, z: -0.31243956, w: -0.6116848}
   m_Size:
     m_Target: 13.625646
     speed: 2
@@ -706,7 +706,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 269
-    y: 222
+    y: 241
     width: 249
     height: 441
   m_SerializedDataModeController:
@@ -724,7 +724,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 42f9ffff
+      m_ExpandedIDs: d2e2ffff28e3ffffaaeeffff2efbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -868,8 +868,8 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 1358
-    y: 222
+    x: 1090
+    y: 19
     width: 276
     height: 441
   m_SerializedDataModeController:
@@ -915,8 +915,8 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 269
-    y: 684
+    x: 0
+    y: 481
     width: 1366
     height: 152
   m_SerializedDataModeController:
@@ -955,9 +955,9 @@ MonoBehaviour:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 45.000458}
-    m_SelectedIDs: a0650000
-    m_LastClickedID: 26016
-    m_ExpandedIDs: 000000007a6500007c65000000ca9a3bffffff7f
+    m_SelectedIDs: 2a650000
+    m_LastClickedID: 25898
+    m_ExpandedIDs: 00000000046500000665000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -985,7 +985,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000007a6500007c650000
+    m_ExpandedIDs: 000000000465000006650000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 

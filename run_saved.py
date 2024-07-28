@@ -235,7 +235,7 @@ max_action = 10000  # Make sure this matches what you used during training
 # checkpoint = torch.load('saved_models/saved_models/sac_model20240720-064303.pth.pth', map_location=torch.device('cpu'))
 # model.load_state_dict(checkpoint['model_state_dict'])
 model = SAC(vector_obs_size, visual_obs_shape, max_action, action_size)
-checkpoint = torch.load('saved_models/saved_models/sac_model20240720-064303.pth.pth', map_location=torch.device('cpu'))
+checkpoint = torch.load('saved_models3/saved_models/sac_model20240720-064303.pth.pth', map_location=torch.device('cpu'))
 
 if isinstance(checkpoint, SAC):
     # If the saved object is an SAC instance

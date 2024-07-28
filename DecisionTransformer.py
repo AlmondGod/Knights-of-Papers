@@ -6,8 +6,9 @@ import torch.nn as nn
 import torch.optim as optim
 import random
 import math
+import time
 
-env = UnityEnvironment(file_name="build4.app", seed=1, side_channels=[])
+env = UnityEnvironment(file_name="build6.app", seed=1, side_channels=[])
 env.reset()
 print("yuh")
 knight_one_names = env.behavior_specs.keys()
@@ -57,33 +58,41 @@ knight_one_names = env.behavior_specs.keys()
 class CNN(nn.Module):
     def __init__(self, visual_input_shape, embed_dim):
         super(CNN, self).__init__()
+
+        channels, height, width = visual_input_shape[2], visual_input_shape[0], visual_input_shape[1]
+        print(channels, height, width)
         
-        # Define CNN for visual input
-        self.conv1 = nn.Conv2d(1, 16, kernel_size=3, stride=2)  # Single channel input
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=2) 
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=2)
-        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
+        # self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
         
         conv_output_size = self._get_conv_output_size(visual_input_shape)
 
         self.fc1 = nn.Linear(conv_output_size, embed_dim)
 
     def _get_conv_output_size(self, shape):
-        print(shape)
         x = torch.rand(1, *shape)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
+        x = nn.functional.relu(self.conv1(x))
+        x = nn.functional.relu(self.conv2(x))
         return int(np.prod(x.size()))
+        # print(shape)
+        # x = torch.rand(1, *shape)
+        # x = self.conv1(x)
+        # x = self.conv2(x)
+        # x = self.conv3(x)
+        # return int(np.prod(x.size()))
 
     def forward(self, visual_input):
         # Process visual input
         batch_size, seq_len, channels, height, width = visual_input.shape
+        print(f"visual input shape: {visual_input.shape}")
+        
         visual_input = visual_input.view(batch_size * seq_len, channels, height, width)
         
         # Process visual input through convolutional layers
         x = nn.functional.relu(self.conv1(visual_input))
         x = nn.functional.relu(self.conv2(x))
-        x = nn.functional.relu(self.conv3(x))
+        # x = nn.functional.relu(self.conv3(x))
         
         # Flatten the conv output
         x = x.view(x.size(0), -1)  # Flatten the conv output
@@ -248,6 +257,7 @@ behavior_spec = env.behavior_specs[wooden_knight]
 # Extract observation and action space sizes
 actuator_obs_size = behavior_spec.observation_specs[0][0][0]
 visual_obs_size = behavior_spec.observation_specs[1][0]
+visual_obs_size = (visual_obs_size[2], visual_obs_size[0], visual_obs_size[1])
 action_size = behavior_spec.action_spec.continuous_size
 
 total_timesteps = 500
@@ -278,6 +288,8 @@ for episode in range(1):
         for agent_id in decision_steps_wooden.agent_id:
             obs = torch.tensor(decision_steps_wooden.obs[0][agent_id], dtype=torch.float32)
             visual_obs = torch.tensor(decision_steps_wooden.obs[1][agent_id], dtype= torch.float32)
+            visual_obs = visual_obs.permute(2, 0, 1).unsqueeze(0)
+            print(f"visobs shape {visual_obs.shape}")
 
             with torch.no_grad():
                 action = np.random.rand(1, action_size)
@@ -293,6 +305,7 @@ for episode in range(1):
         for agent_id in decision_steps_grass.agent_id:  
             obs = torch.tensor(decision_steps_grass.obs[1][agent_id - 6], dtype=torch.float32)
             visual_obs = torch.tensor(decision_steps_grass.obs[0][agent_id - 6], dtype= torch.float32)
+            visual_obs = visual_obs.permute(2, 0, 1).unsqueeze(0)
                 
             with torch.no_grad():
                 action = np.random.rand(1, action_size)
@@ -416,12 +429,55 @@ for episode_end in episode_ends:
         grass_returns_to_go_sequences.append(grass_returns_to_go[i - K:i])
         i += K
 
+sequence_lengths = [
+    len(wood_state_sequences), len(wood_vision_sequences),
+    len(wood_action_sequences), len(wood_returns_to_go_sequences),
+    len(timestep_sequences), len(grass_state_sequences),
+    len(grass_vision_sequences), len(grass_action_sequences),
+    len(grass_returns_to_go_sequences)
+]
+
+if len(set(sequence_lengths)) != 1:
+    print("Sequence lengths are not all equal:")
+    print(f"wood_state_sequences: {len(wood_state_sequences)}")
+    print(f"wood_vision_sequences: {len(wood_vision_sequences)}")
+    print(f"wood_action_sequences: {len(wood_action_sequences)}")
+    print(f"wood_returns_to_go_sequences: {len(wood_returns_to_go_sequences)}")
+    print(f"timestep_sequences: {len(timestep_sequences)}")
+    print(f"grass_state_sequences: {len(grass_state_sequences)}")
+    print(f"grass_vision_sequences: {len(grass_vision_sequences)}")
+    print(f"grass_action_sequences: {len(grass_action_sequences)}")
+    print(f"grass_returns_to_go_sequences: {len(grass_returns_to_go_sequences)}")
+else:
+    print(f"All sequences have length {sequence_lengths[0], sequence_lengths[1], sequence_lengths[2], sequence_lengths[3], sequence_lengths[4], sequence_lengths[5], sequence_lengths[6], sequence_lengths[7], sequence_lengths[8]}")
+
 #now shuffle these sequences
 zipped = list(zip(wood_state_sequences, wood_vision_sequences, wood_action_sequences, wood_returns_to_go_sequences, timestep_sequences, grass_state_sequences, grass_vision_sequences, grass_action_sequences, grass_returns_to_go_sequences))
 random.shuffle(zipped)
 wood_state_sequences, wood_vision_sequences, wood_action_sequences, wood_returns_to_go_sequences, timestep_sequences, grass_state_sequences, grass_vision_sequences, grass_action_sequences, grass_returns_to_go_sequences = zip(*zipped)
 wood_state_sequences, wood_vision_sequences, wood_action_sequences, wood_returns_to_go_sequences, timestep_sequences, grass_state_sequences, grass_vision_sequences, grass_action_sequences, grass_returns_to_go_sequences = list(wood_state_sequences), list(wood_vision_sequences), list(wood_action_sequences), list(wood_returns_to_go_sequences), list(timestep_sequences), list(grass_state_sequences), list(grass_vision_sequences), list(grass_action_sequences), list(grass_returns_to_go_sequences)
 
+sequence_lengths = [
+    len(wood_state_sequences), len(wood_vision_sequences),
+    len(wood_action_sequences), len(wood_returns_to_go_sequences),
+    len(timestep_sequences), len(grass_state_sequences),
+    len(grass_vision_sequences), len(grass_action_sequences),
+    len(grass_returns_to_go_sequences)
+]
+
+if len(set(sequence_lengths)) != 1:
+    print("Sequence lengths are not all equal:")
+    print(f"wood_state_sequences: {len(wood_state_sequences)}")
+    print(f"wood_vision_sequences: {len(wood_vision_sequences)}")
+    print(f"wood_action_sequences: {len(wood_action_sequences)}")
+    print(f"wood_returns_to_go_sequences: {len(wood_returns_to_go_sequences)}")
+    print(f"timestep_sequences: {len(timestep_sequences)}")
+    print(f"grass_state_sequences: {len(grass_state_sequences)}")
+    print(f"grass_vision_sequences: {len(grass_vision_sequences)}")
+    print(f"grass_action_sequences: {len(grass_action_sequences)}")
+    print(f"grass_returns_to_go_sequences: {len(grass_returns_to_go_sequences)}")
+else:
+    print(f"All sequences have length {sequence_lengths[0], sequence_lengths[1], sequence_lengths[2], sequence_lengths[3], sequence_lengths[4], sequence_lengths[5], sequence_lengths[6], sequence_lengths[7], sequence_lengths[8]}")
 #------------------------------BATCH INITIALIZATION------------------------------------
 #each batch is a tuple of (s, v, R, a, t) where each element is a list of tensors of length batch_size, 
 # and each of those tensors contains k tokens, and each token is of its given size
@@ -430,12 +486,20 @@ wood_state_sequences, wood_vision_sequences, wood_action_sequences, wood_returns
 #subsequence items are each of length 5K
 # batches are of size 5 * batch_size * K * unique input_dims
 dataloader = []
-num_batches = int(len(wood_states) / (batch_size * K))
+num_batches = int(len(wood_state_sequences) / (batch_size * K))
+# num_batches = sequence_lengths[0]
 
+
+print(f"num_batches: {num_batches}")
+print(f"batch_size: {batch_size}")
+print(f"K: {K}")
 for i in range(num_batches):
     batch_wood = ([], [], [], [], [])
     batch_grass = ([], [], [], [], [])
     for j in range(batch_size):
+        print("error info")
+        print(i * batch_size + j)
+        print(len(wood_returns_to_go_sequences))
         batch_wood[0].append(wood_returns_to_go_sequences[i * batch_size + j])
         batch_wood[1].append(wood_state_sequences[i * batch_size + j])
         batch_wood[2].append(wood_vision_sequences[i * batch_size + j])
@@ -478,6 +542,7 @@ print("dataloader created")
 
 #initialize model and optimizer
 # timesteps = int (total_timesteps / decision_interval)
+print(f"visual obs size: {visual_obs_size}")
 timesteps = 500
 model = DecisionTransformer(actuator_obs_size, visual_obs_size, action_size, n_blocks, n_heads, embed_dim, context_len, dropout, timesteps)
 print("model done")
@@ -485,6 +550,8 @@ optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=wt_decay)
 print("optimizer done")
 mse_loss = nn.MSELoss()
 
+#---------------------------------TRAINING LOOP-------------------------------------
+losses = []
 #training loop
 for (R, s, v, a, t) in dataloader:
     #alter model to take in an entire batch
@@ -497,6 +564,7 @@ for (R, s, v, a, t) in dataloader:
     R = torch.tensor(R, dtype=torch.float32).unsqueeze(-1)
     t = torch.tensor(t, dtype=torch.long)
     s = torch.tensor(np.array(s), dtype=torch.float32)
+    # v = torch.tensor(np.array(v), dtype=torch.float32).permute(0, 1, 4, 2, 3)
     v = torch.tensor(np.array(v), dtype=torch.float32)
     a_true = torch.tensor(np.array(a)[:, 19, :], dtype=torch.float32)
     a = torch.tensor(np.array(a)[:, :19, :], dtype=torch.float32)
@@ -507,11 +575,18 @@ for (R, s, v, a, t) in dataloader:
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+    losses.append(loss.item())
 
+import os
+if not os.path.exists('saved_transformer_models'):
+    os.makedirs('saved_transformer_models')
+folder = "saved_transformer_models/"
+model_name = "sac_model" + time.strftime("%Y%m%d-%H%M%S") + ".pth"
+torch.save(model, folder + model_name)
 torch.save({
     'data_size': len(wood_states),
     'model_state_dict': model.state_dict(),
     'optimizer_state_dict': optimizer.state_dict(),
-    'loss': loss,
+    'loss': losses,
     # any other metrics or variables you need
-}, 'saved_models/decision_transformer.pth')
+}, "saved_transformer_models/decision_transformer_" + time.strftime("%Y%m%d-%H%M%S") + ".pth")
