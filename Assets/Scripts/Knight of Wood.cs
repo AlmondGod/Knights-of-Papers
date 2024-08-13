@@ -124,7 +124,7 @@ public class KnightofWood : Agent {
         //add a reward if the position of the head is above the position of the body
         if (Head.position.y > Body.position.y)
         {
-            AddReward(0.01f);
+            AddReward(0.1f);
         }
     }
 
@@ -132,9 +132,8 @@ public class KnightofWood : Agent {
     //as well as its right and left foot and knee
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-         var bpDict = m_JdController.bodyPartsDict;
+        var bpDict = m_JdController.bodyPartsDict;
         var continuousActions = actionBuffers.ContinuousActions;
-        Debug.Log("continuous actions length: " + continuousActions.Length);
 
         foreach (var transform in bpDict.Keys)
         {
@@ -144,39 +143,39 @@ public class KnightofWood : Agent {
             var bp = bpDict[transform];
 
              if (transform.Equals(UpperArm_L)) {
-                Debug.Log("UpperArm_L");
+                
                 bp.SetJointTargetRotation(continuousActions[0], continuousActions[1], continuousActions[2]);
                 bp.SetJointStrength(continuousActions[3]);
             } else if (transform.Equals(LowerArm_L)) {
-                Debug.Log("LowerArm_L");
+                
                 bp.SetJointTargetRotation(continuousActions[4], 0, 0);
                 bp.SetJointStrength(continuousActions[5]);
             } else if (transform.Equals(UpperArm_R)) {
-                Debug.Log("UpperArm_R");
+                
                 bp.SetJointTargetRotation(continuousActions[6], continuousActions[7], continuousActions[8]);
                 bp.SetJointStrength(continuousActions[9]);
             } else if (transform.Equals(LowerArm_R)) {
-                Debug.Log("LowerArm_R");
+                
                 bp.SetJointTargetRotation(continuousActions[10], 0, 0);
                 bp.SetJointStrength(continuousActions[11]);
             } else if (transform.Equals(UpperLeg_L)) {
-                Debug.Log("UpperLeg_L");
+                
                 bp.SetJointTargetRotation(continuousActions[12], 0, continuousActions[13]);
                 bp.SetJointStrength(continuousActions[14]);
             } else if (transform.Equals(LowerLeg_L)) {
-                Debug.Log("LowerLeg_L");
+                
                 bp.SetJointTargetRotation(continuousActions[15], 0, 0);
                 bp.SetJointStrength(continuousActions[16]);
             } else if (transform.Equals(UpperLeg_R)) {
-                Debug.Log("UpperLeg_R");
+                
                 bp.SetJointTargetRotation(continuousActions[17], 0, continuousActions[18]);
                 bp.SetJointStrength(continuousActions[19]);
             } else if (transform.Equals(LowerLeg_R)) {
-                Debug.Log("LowerLeg_R");
+                
                 bp.SetJointTargetRotation(continuousActions[20], 0, 0);
                 bp.SetJointStrength(continuousActions[21]);
             } else if (transform.Equals(Head)) {
-                Debug.Log("Head");
+                
                 bp.SetJointTargetRotation(continuousActions[22], continuousActions[23], 0);
                 bp.SetJointStrength(continuousActions[24]);
             }
@@ -186,45 +185,41 @@ public class KnightofWood : Agent {
             float currentDistanceToOpponent = Vector3.Distance(Body.transform.position, Opponent.position);
             if (currentDistanceToOpponent < previousDistanceToOpponent)
             {
-                Debug.Log("positive closer reward");
-                AddReward(0.01f); // Reward for getting closer
+                
+                AddReward(10f); // Reward for getting closer
             }
             else if (currentDistanceToOpponent >= previousDistanceToOpponent)
             {   
-                Debug.Log("further reward");
-                AddReward(-0.01f); // Reward for getting closer
+                
+                AddReward(-10f); // Reward for getting further
             }
             previousDistanceToOpponent = currentDistanceToOpponent;
         }
     }
 
     private void OnCollisionEnter(Collision collision) {
-        Debug.Log("OnCollisionEnter called");
-        Debug.Log(collision.gameObject.name);
+        
+        
         if (collision.gameObject.name == "WallRight" || collision.gameObject.name == "WallLeft" || collision.gameObject.name == "WallWood" || collision.gameObject.name == "WallGrass") {
-            Debug.Log("OnCollisionEnter executed with " + collision.gameObject.name);
-            SetReward(-2f); // Out of the arena
+            
+            AddReward(-2f); // Out of the arena
             EndEpisode();
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {  
-        Debug.Log("OnTriggerEnter called with " + other.gameObject.name);
+        
         if (other.gameObject.name == "WallRight" || other.gameObject.name == "WallLeft" || other.gameObject.name == "WallWood" || other.gameObject.name == "WallGrass") {
-            Debug.Log("OnTriggerEnter executed with " + other.gameObject.name);
-            SetReward(-2f); // Out of the arena
+            
+            AddReward(-2f); // Out of the arena
             EndEpisode();
         }
         if (other.TryGetComponent(out Wall wall)) {
-            Debug.Log("OnTriggerEnter executed with " + other.gameObject.name);
-            SetReward(-2f); // Out of the arena
+            
+            AddReward(-2f); // Out of the arena
             EndEpisode();
         }
-        // if(other.TryGetComponent<SwordGrass>(out SwordGrass SwordGrass)) {
-        //     SetReward(-1f); // Hit by opponent's sword
-        //     EndEpisode();
-        // }
     }
 
     public void OnBlockedHit() {
@@ -494,8 +489,7 @@ public class BodyPart
                 touchingGround = true;
                 if (penalizeGroundContact)
                 {
-                    Debug.Log("called penalize ground contact");
-                    agent.SetReward(groundContactPenalty);
+                    agent.AddReward(groundContactPenalty);
                 }
 
                 if (agentDoneOnGroundContact)

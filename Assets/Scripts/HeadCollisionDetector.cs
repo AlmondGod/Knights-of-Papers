@@ -18,8 +18,7 @@ public class HeadCollisionDetector : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("ground"))
         {
-            Debug.Log("Head collided with: " + collision.gameObject.name);
-            agent.AddReward(-0.1f); // Optional: Set a negative reward
+            agent.AddReward(1f); // Optional: Set a negative reward
         }
     }
 
@@ -28,7 +27,7 @@ public class HeadCollisionDetector : MonoBehaviour
         if (other.gameObject.CompareTag("Wall"))
         {
             Debug.Log("Head triggered with: " + other.gameObject.name);
-            agent.SetReward(-1f); // Optional: Set a positive reward
+            agent.AddReward(-1f); // Optional: Set a positive reward
             agent.EndEpisode();
         }
     }

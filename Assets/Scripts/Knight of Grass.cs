@@ -36,9 +36,9 @@ public class KnightofGrass : Agent {
         
         GameObject jointdriveobject = new GameObject("JointDrive");
         m_JdController = jointdriveobject.AddComponent<JointDriveController>();
-        m_JdController.maxJointForceLimit = 10000f;
-        m_JdController.maxJointSpring = 100000f;
-        m_JdController.jointDampen = 5f;
+        m_JdController.maxJointForceLimit = 1000000000000000f;
+        m_JdController.maxJointSpring = 100000000000000f;
+        m_JdController.jointDampen = 0f;
 
         m_JdController.transform.parent = transform;
 
@@ -117,6 +117,12 @@ public class KnightofGrass : Agent {
         {
             CollectObservationBodyPart(bodyPart, sensor);
         } 
+
+        //add a reward if the position of the head is above the position of the body
+        if (Head.position.y > Body.position.y)
+        {
+            AddReward(0.1f);
+        }
     }
 
     //the knight can both move and rotate its upper and lower right and left arms
@@ -125,7 +131,7 @@ public class KnightofGrass : Agent {
     {
         var bpDict = m_JdController.bodyPartsDict;
         var continuousActions = actionBuffers.ContinuousActions;
-        Debug.Log("continuous actions length: " + continuousActions.Length);
+        // Debug.Log(actionBuffers.ContinuousActions);
 
         foreach (var transform in bpDict.Keys)
         {
@@ -133,43 +139,50 @@ public class KnightofGrass : Agent {
             //if bp is lower arm or lower leg dont rotate on z or y axis
             //if bp is upper leg dont rotate on y axis
             var bp = bpDict[transform];
+            // Debug.Log("bp: " + bp);
+            // Debug.log(continuousActions[0] + " " + continuousActions[1]);
+            // Debug.Log("all continuous actions: " + continuousActions[0] + " " + continuousActions[1] + " " + continuousActions[2] + " " + continuousActions[3] + " " + continuousActions[4] + " " + continuousActions[5] + " " + continuousActions[6] + " " + continuousActions[7] + " " + continuousActions[8] + " " + continuousActions[9] + " " + continuousActions[10] + " " + continuousActions[11] + " " + continuousActions[12] + " " + continuousActions[13] + " " + continuousActions[14] + " " + continuousActions[15] + " " + continuousActions[16] + " " + continuousActions[17] + " " + continuousActions[18] + " " + continuousActions[19] + " " + continuousActions[20] + " " + continuousActions[21] + " " + continuousActions[22] + " " + continuousActions[23] + " " + continuousActions[24]);
 
             if (transform.Equals(UpperArm_L)) {
-                Debug.Log("UpperArm_L");
-                bp.SetJointTargetRotation(continuousActions[0], continuousActions[1], continuousActions[2]);
-                bp.SetJointStrength(continuousActions[3]);
+                
+                bp.SetJointTargetRotation(continuousActions[0] * 1000, continuousActions[1] * 1000, continuousActions[2] * 1000);
+                bp.SetJointStrength(continuousActions[3] * 1000);
             } else if (transform.Equals(LowerArm_L)) {
-                Debug.Log("LowerArm_L");
-                bp.SetJointTargetRotation(continuousActions[4], 0, 0);
-                bp.SetJointStrength(continuousActions[5]);
+                
+                bp.SetJointTargetRotation(continuousActions[4] * 1000, 0, 0);
+                bp.SetJointStrength(continuousActions[5] * 1000);
             } else if (transform.Equals(UpperArm_R)) {
-                Debug.Log("UpperArm_R");
-                bp.SetJointTargetRotation(continuousActions[6], continuousActions[7], continuousActions[8]);
-                bp.SetJointStrength(continuousActions[9]);
+                
+                bp.SetJointTargetRotation(continuousActions[6] * 1000, continuousActions[7] * 1000, continuousActions[8] * 1000);
+                bp.SetJointStrength(continuousActions[9] * 1000);
             } else if (transform.Equals(LowerArm_R)) {
-                Debug.Log("LowerArm_R");
-                bp.SetJointTargetRotation(continuousActions[10], 0, 0);
-                bp.SetJointStrength(continuousActions[11]);
+                // Debug.Log("continuous actions: " + continuousActions[10] + " " + continuousActions[11]);
+
+                
+                bp.SetJointTargetRotation(continuousActions[10] * 1000, 0, 0);
+                bp.SetJointStrength(continuousActions[11] * 1000);
             } else if (transform.Equals(UpperLeg_L)) {
-                Debug.Log("UpperLeg_L");
-                bp.SetJointTargetRotation(continuousActions[12], 0, continuousActions[13]);
-                bp.SetJointStrength(continuousActions[14]);
+                // Debug.Log("upper leg left");
+                // Debug.Log("continuous actions: " + continuousActions[12] + " " + continuousActions[13]);
+                // Debug.Log("continuous actions: " + continuousActions[14]);
+                bp.SetJointTargetRotation(continuousActions[12] * 1000, 0, continuousActions[13] * 1000);
+                bp.SetJointStrength(continuousActions[14] * 1000);
             } else if (transform.Equals(LowerLeg_L)) {
-                Debug.Log("LowerLeg_L");
-                bp.SetJointTargetRotation(continuousActions[15], 0, 0);
-                bp.SetJointStrength(continuousActions[16]);
+                // Debug.Log("lower leg left");
+                bp.SetJointTargetRotation(continuousActions[15] * 1000, 0, 0);
+                bp.SetJointStrength(continuousActions[16] * 1000);
             } else if (transform.Equals(UpperLeg_R)) {
-                Debug.Log("UpperLeg_R");
-                bp.SetJointTargetRotation(continuousActions[17], 0, continuousActions[18]);
-                bp.SetJointStrength(continuousActions[19]);
+                // Debug.Log("upper leg right");
+                bp.SetJointTargetRotation(continuousActions[17] * 1000, 0, continuousActions[18] * 1000);
+                bp.SetJointStrength(continuousActions[19] * 1000);
             } else if (transform.Equals(LowerLeg_R)) {
-                Debug.Log("LowerLeg_R");
-                bp.SetJointTargetRotation(continuousActions[20], 0, 0);
-                bp.SetJointStrength(continuousActions[21]);
+                // 
+                bp.SetJointTargetRotation(continuousActions[20] * 1000, 0, 0);
+                bp.SetJointStrength(continuousActions[21] * 1000);
             } else if (transform.Equals(Head)) {
-                Debug.Log("Head");
-                bp.SetJointTargetRotation(continuousActions[22], continuousActions[23], 0);
-                bp.SetJointStrength(continuousActions[24]);
+                // 
+                bp.SetJointTargetRotation(continuousActions[22] * 1000, continuousActions[23] * 1000, 0);
+                bp.SetJointStrength(continuousActions[24] * 1000);
             }
         }
         if (Opponent != null)
@@ -177,13 +190,13 @@ public class KnightofGrass : Agent {
             float currentDistanceToOpponent = Vector3.Distance(Body.transform.position, Opponent.position);
             if (currentDistanceToOpponent < previousDistanceToOpponent)
             {
-                Debug.Log("positive closer reward");
-                AddReward(0.01f); // Reward for getting closer
+                
+                AddReward(10f); // Reward for getting closer
             }
             else if (currentDistanceToOpponent >= previousDistanceToOpponent)
             {   
-                Debug.Log("further reward");
-                AddReward(-0.01f); // Reward for getting closer
+                
+                AddReward(-10f); // Negative reward for getting further
             }
             previousDistanceToOpponent = currentDistanceToOpponent;
         }
@@ -191,7 +204,7 @@ public class KnightofGrass : Agent {
 
     private void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.name == "WallRight" || collision.gameObject.name == "WallLeft" || collision.gameObject.name == "WallWood" || collision.gameObject.name == "WallGrass") {
-            SetReward(-2f); // Out of the arena
+            AddReward(-2f); // Out of the arena
             EndEpisode();
         }
     }
@@ -199,17 +212,13 @@ public class KnightofGrass : Agent {
     private void OnTriggerEnter(Collider other)
     {  
         if (other.gameObject.name == "WallRight" || other.gameObject.name == "WallLeft" || other.gameObject.name == "WallWood" || other.gameObject.name == "WallGrass") {
-            SetReward(-2f); // Out of the arena
+            AddReward(-2f); // Out of the arena
             EndEpisode();
         }
         if (other.TryGetComponent(out Wall wall)) {
-            SetReward(-2f); // Out of the arena
+            AddReward(-2f); // Out of the arena
             EndEpisode();
         }
-        // if(other.TryGetComponent<SwordGrass>(out SwordGrass SwordGrass)) {
-        //     SetReward(-1f); // Hit by opponent's sword
-        //     EndEpisode();
-        // }
     }
 
     public void OnBlockedHit() {
@@ -219,7 +228,7 @@ public class KnightofGrass : Agent {
     public void OnSwordHitOpponent()
     {
         // Add a positive reward for hitting the opponent
-        AddReward(100f);
+        AddReward(1000f);
         EndEpisode();
     }
 

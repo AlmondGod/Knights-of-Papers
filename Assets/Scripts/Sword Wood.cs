@@ -52,11 +52,10 @@ public class SwordWood : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Sword triggered with: " + other.gameObject.name);
         if (other.gameObject.CompareTag("ghead"))
         {
             Debug.Log("Sword triggered with: " + other.gameObject.name);
-            agent.SetReward(5f);
+            agent.AddReward(2000f);
             agent.EndEpisode();
         }   
     }

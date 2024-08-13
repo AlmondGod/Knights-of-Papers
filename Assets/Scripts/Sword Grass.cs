@@ -52,11 +52,10 @@ public class SwordGrass : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Debug.Log("Sword triggered with: " + other.gameObject.name);
         if (other.gameObject.CompareTag("whead"))
         {
-            Debug.Log("Sword triggered with: " + other.gameObject.name);
-            agent.SetReward(5f);
+            // Debug.Log("Sword triggered with: " + other.gameObject.name);
+            agent.AddReward(2000f);
             agent.EndEpisode();
         }   
     }
