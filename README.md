@@ -22,11 +22,11 @@ pip install -r requirements.txt
 And run any desired algorithm in src!
 
 
-# Training
+### Training
 Each algorithm is trained by self-play in a 8-agent environment over 3000-5000 environment episodes
 Used vast.ai-rented NVIDIA RTX 4090
 
-# Visualizations
+### Visualizations
 To see a trained algorithm, use the equivlent run-saved script or one of the duels scripts, and make sure the environment is set to no_graphics=True
 
 
