@@ -9,14 +9,18 @@ Using Unity MLAgents simulator
 Environments exist for macos, windows, and linux. 
 You must use Python > 3.10.5, tested on Python 3.10.14
 
-`git clone https://github.com/AlmondGod/Knights-of-Papers knights-of-papers`
-`cd knights-of-papers`
-`python3 -m venv venv`
-`source venv/bin/activate`
-`pip install --upgrade pip`
-`pip install -r requirements.txt`
+```
+git clone https://github.com/AlmondGod/Knights-of-Papers knights-of-papers
+cd knights-of-papers
+python3 -m venv venv
+source venv/bin/activate
+
+pip install --upgrade pip
+pip install -r requirements.txt
+```
 
 And run any desired algorithm in src!
+
 
 # Training
 Each algorithm is trained by self-play in a 8-agent environment over 3000-5000 environment episodes
