@@ -4,9 +4,13 @@
 See [this video](https://youtu.be/kpDfXqX7h1U) on the creation and training of this repository's contents!
 
 Algorithms: 
+
 [DDPG](./src/DDPG/) 
+
 [Decision Transformer](./src/Decision-Transformer/) 
+
 [I2A with PPO](./src/I2A-PPO/)
+
 [SAC](./src/SAC/)
 
 ## Installation
