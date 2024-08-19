@@ -139,13 +139,6 @@ class DDPG:
             return
         
         minibatch = self.memory.sample(self.batch_size)
-
-        
-        
-        
-        
-        
-        
     
         visual_inputs = torch.FloatTensor(np.array([m[0][0] for m in minibatch]))
         visual_inputs = visual_inputs.permute(0, 3, 1, 2)  # Rearrange dimensions

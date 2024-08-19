@@ -36,8 +36,8 @@ public class KnightofGrass : Agent {
         
         GameObject jointdriveobject = new GameObject("JointDrive");
         m_JdController = jointdriveobject.AddComponent<JointDriveController>();
-        m_JdController.maxJointForceLimit = 1000000000000000f;
-        m_JdController.maxJointSpring = 100000000000000f;
+        m_JdController.maxJointForceLimit = 1000f;
+        m_JdController.maxJointSpring = 10f;
         m_JdController.jointDampen = 0f;
 
         m_JdController.transform.parent = transform;

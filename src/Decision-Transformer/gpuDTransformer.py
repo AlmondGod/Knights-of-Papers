@@ -293,7 +293,7 @@ wood_actions = []
 timesteps = []
 episode_ends = []
 
-for episode in range(1):
+for episode in range(1000):
     print(f"Starting episode:{episode}")
     env.reset()
     decision_steps_wooden, terminal_steps_wooden = env.get_steps(wooden_knight)
@@ -584,7 +584,6 @@ for (R, s, v, a, t) in dataloader:
     v = torch.tensor(np.array(v), dtype=torch.float32).to(device)
     a_true = torch.tensor(np.array(a)[:, 19, :], dtype=torch.float32).to(device)
     a = torch.tensor(np.array(a)[:, :19, :], dtype=torch.float32).to(device)
-
 
     action_prediction = model(R, s, v, a, t)
     action_prediction = action_prediction[:, -1, :]#temporary solution
