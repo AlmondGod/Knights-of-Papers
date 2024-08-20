@@ -3,15 +3,11 @@
 
 See [this video](https://youtu.be/kpDfXqX7h1U) on the creation and training of this repository's contents!
 
-Algorithms: 
-
-[DDPG](./src/DDPG/) 
-
-[Decision Transformer](./src/Decision-Transformer/) 
-
-[I2A with PPO](./src/I2A-PPO/)
-
-[SAC](./src/SAC/)
+Algorithms: \
+[DDPG](./src/DDPG/): https://arxiv.org/abs/1509.02971 \
+[Decision Transformer](./src/Decision-Transformer/): https://arxiv.org/abs/2106.01345 \
+[I2A with PPO](./src/I2A-PPO/): https://arxiv.org/abs/1707.06203, https://arxiv.org/abs/1707.06347 \
+[SAC](./src/SAC/): https://arxiv.org/abs/1801.01290
 
 ## Installation
 
@@ -31,7 +27,7 @@ pip install -r requirements.txt
 ## Relevant File Map 
 [src](src): training algorithms
 
-saved_algorithm_model: saved models which can be run using the running files in the same folder
+saved_x_model: saved models which can be run using the running files in the same folder
 
 [environment-builds](environment-builds): (explained below) available for [linux](environment-builds/linux/), [macos](environment-builds/macos), and [windows](environment-builds/windows/). To use them simply link the filepath of the desired build in the relevant script's environment setup. 
 
