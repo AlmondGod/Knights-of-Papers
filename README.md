@@ -11,7 +11,7 @@ Algorithms: \
 
 ## Installation
 
-Environments exist for macos, windows, and linux. 
+Environments exist for Macos, Windows, and Linux. 
 You must use Python > 3.10.5, tested on Python 3.10.14
 
 ```
@@ -34,19 +34,19 @@ saved_x_model: saved models which can be run using the running files in the same
 [Assets](Assets): Unity files and C# code used to construct the environment
 
 ## Environment
-This project uses Unity Machine Learning Simulator, which can be downloaded [here](https://unity.com/download) (not necessary for the function of this repository, only if anyone wants to modify the environment). Each body has 9 joints and movement restricted according to typical human joint dimensions. Rewards are gained by 
-1. Touching ones' sword to the opponent (+10 and episode end)
-2. Maintaining ones' head above their body in the y dimension (+0.1, -0.1 otherwise)
+This project uses Unity Machine Learning Simulator, which can be downloaded [here](https://unity.com/download) (not necessary for the function of this repository, only if anyone wants to modify the environment). Each body has 9 joints and movement is restricted according to typical human joint dimensions. Rewards are gained by 
+1. Touching one's sword to the opponent (+10 and episode end)
+2. Maintaining one's head above their body in the y dimension (+0.1, -0.1 otherwise)
 3. Moving closer to the opponent than in the previous timestep (+0.1, -0.1 otherwise)
 
-The robots start two body-lengths from each other and must converge to fight. Walls surround the small arena, which, if contacted, result in a -10 reward penalty and the episode ending. The agents are automatically reset after 1000 timesteps.
+The robots start two body lengths from each other and must converge to fight. Walls surround the small arena, which, if contacted, result in a -10 reward penalty and the episode ending. The agents are automatically reset after 1000 timesteps.
 
-Environment builds are necessary to allow the Unity ML Python API to ineract with the environments using custom algorithms. 
+Environment builds are necessary to allow the Unity ML Python API to interact with the environments using custom algorithms. 
 
-For macos, use the highest numbered build (currently [build8.app](environment-builds/macos/build8.app)), for linux use [gpubuildclose.x86_64](environment-builds/linux/gpubuildclose.x86_64), and for windows, either suffices.
+For Macos, use the highest numbered build (currently [build8.app](environment-builds/macos/build8.app)), for Linux use [gpubuildclose.x86_64](environment-builds/linux/gpubuildclose.x86_64), and for windows, either suffices.
 
 ## Training
-Each algorithm is trained by self-play in a 60-agent environment over 15000-5000 environment episodes, each with 1000 timesteps. Models trained using vast.ai-rented NVIDIA RTX 4090.
+Each algorithm is trained by self-play in a 60-agent environment over 1500-5000 environment episodes, each with 1000 timesteps. Models trained using vast.ai-rented NVIDIA RTX 4090.
 
 ## Visualizations
-To see a trained algorithm, use the equivlent run-saved script or one of the duels scripts, and make sure the environment is set to no_graphics=True
+To see a trained algorithm, use the equivalent run-saved script or one of the duels scripts, and make sure the environment is set to no_graphics=True
