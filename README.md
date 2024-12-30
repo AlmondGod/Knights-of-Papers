@@ -1,13 +1,14 @@
-# Knights of Papers: 
-## Duel of Reinforcement Learning Algorithms
+<img width="1000" alt="Screenshot 2024-12-30 at 4 26 17 PM" src="https://github.com/user-attachments/assets/cc4fcfd6-0701-4178-8665-9b3012aabb92" />
 
-See [this video](https://youtu.be/kpDfXqX7h1U) on the creation and training of this repository's contents!
+# Knights of Papers: Duel of Reinforcement Learning Algorithms
+
+Reinforcement Learning Self-Play on 24-DOF Unity combat humanoids. See [this video](https://youtu.be/kpDfXqX7h1U) on the creation of this repository's contents!
 
 Algorithms: \
-[DDPG](./src/DDPG/): https://arxiv.org/abs/1509.02971 \
-[Decision Transformer](./src/Decision-Transformer/): https://arxiv.org/abs/2106.01345 \
-[I2A with PPO](./src/I2A-PPO/): https://arxiv.org/abs/1707.06203, https://arxiv.org/abs/1707.06347 \
-[SAC](./src/SAC/): https://arxiv.org/abs/1801.01290
+[DDPG](./src/DDPG/): [paper](https://arxiv.org/abs/1509.02971) \
+[Decision Transformer](./src/Decision-Transformer/): [paper](https://arxiv.org/abs/2106.01345) \
+[I2A with PPO](./src/I2A-PPO/): [paper](https://arxiv.org/abs/1707.06203), [paper](https://arxiv.org/abs/1707.06347) \
+[SAC](./src/SAC/): [paper](https://arxiv.org/abs/1801.01290)
 
 ## Installation
 
